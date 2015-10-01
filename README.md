@@ -16,5 +16,5 @@ uno sia un servo, per cui servoM[] ha 1 bit a uno.
 #inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
 #inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
 
-#volendo, si può muovere il servo a piacere inviando il comando: @m9:30# (se si volesse muovere di 30 gradi il servo sul pin 9)
+#volendo, si può muovere il servo a piacere inviando, ad esempio, il comando: @m9:30# (se si volesse muovere di 30 gradi il servo sul pin 9)
 
