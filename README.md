@@ -3,6 +3,7 @@
 Il codice non è ancora abbastanza generico da permettere il settaggio completo della scheda da parte di Port.
 Arduino al momento riconosce un set limitato di comandi.
 Per testarne il funzionamento si legga quanto segue.
+(nell'esempio si suppone il cavo di segnale del servo collegato al pin digitale 9, il sensore di temperatura sul pin A0 analogico)
 Esempio di dialogo e setup:
 server per prima cosa invia un comando @p-------------# per indicare i pin in uso nell'applicazione.
 in seguito specifica quali sono di sensore, quali di attuatore, e tra questi quali di servomotore e altre specificità.
