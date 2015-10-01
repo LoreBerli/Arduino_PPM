@@ -16,3 +16,5 @@ inviare @d10000000000000000000#  --->sensor[] ha1 pin a uno (lo zero)
 inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
 inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
 
+
+
