@@ -10,11 +10,11 @@ di conseguenza arduino ha l'array pinCom[] che contiene, per esempio, 6 pin a 1 
 sono di sensori e due di attuatori, perciò sensor[] ha 4 bit a 1 e att[] ne ha 2. dei due attuatori, mettiamo che
 uno sia un servo, per cui servoM[] ha 1 bit a uno.
 
-Se voglio attivare un sensore sul pin 0 e un attuatore servomotore sul pin 9 devo:
-inviare @p10000000010000000000#  --->pin di interesse (attuatori e sensori)
-inviare @d10000000000000000000#  --->sensor[] ha1 pin a uno (lo zero)
-inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
-inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
+#Se voglio attivare un sensore sul pin 0 e un attuatore servomotore sul pin 9 devo:
+#inviare @p10000000010000000000#  --->pin di interesse (attuatori e sensori)
+#inviare @d10000000000000000000#  --->sensor[] ha1 pin a uno (lo zero)
+#inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
+#inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
 
 
 
