@@ -19,6 +19,9 @@ int servoM[20];//e un servo (vanno dati i gradi, è specifica la trattazione)
 int pin_array[20]; //array di ciclo per i for                                       //pinCom[], sensor[], att[] e servoM[] sono usati nel setup
 int server_pin=-1; //pin deciso da server per fare cose (es. comando attuatore)
 int grades=0; //gradi servo comandati da server
+int temperature=0; //se 1, indica che il sensore sul pin i-esimo è di temperatura (ciò comporta una trattazione specifica)-->comando @tmp:(pin-iesimo)#
+                   //N.B. ho supposto un solo sensore di ogni tipo per ogni scheda (es. max 1 sensore di temperatura, ecc) perché questo consente di non dover utilizzare un array di 20
+                   //variabili "tipo-del-sensore", ma ne basta una sola. la memoria è limitata!
 
 void setup() {
   Serial.begin(9600); 
@@ -68,13 +71,13 @@ void loop() {
     major=1;
   }else major=0;
 
-  if( (buff[0]=='@')&&(buff[1]=='p')&&(buff[22]=='#') ) { //è il messaggio di setup dei pin da tenere d'occhio (@p11111111111111111111#) (gli uni possono anche essere zeri)
-    Serial.println("in arrivo setup dei pin dei sensori, tieni d'occhio i pin corrispondenti a:");
-    
-    for(int i=2;i<22;i++){ //riempiamo l'array dei pin da tenere d'occhio con ciò che abbiamo ricevuto da port, che è una lista di 20 uni e/o zeri. se c'è uno zero, non va tenuto d'occhio quel pin     
-      pinCom[(i-2)]=buff[i]-48;     
-      Serial.print(pinCom[i-2]); //stampa di controllo
-    }
+  //"il pin i-esimo verrà usato nell'applicazione"-->@pin:(pin i-esimo su due byte (uno per cifra))# esempio @pin:04#
+  if( (buff[0]=='@')&&(buff[1]=='p')&&(buff[2]=='i')&&(buff[3]=='n')&&(buff[4]==':')&&(buff[7]=='#') ) { 
+    Serial.println("Arduino, utilizza questo pin nell'applicazione:");    
+    server_pin=((buff[5]-48)*10)+(buff[6]-48); //converte in decimale
+    Serial.println(server_pin);
+    pinCom[server_pin]=1; //pone a 1 la locazione corrispondente di pinCom  
+    server_pin=0;  
      
     for(int i=0;i<64;i++){//ripuliamo il buffer di lettura (23)
       buff[i]=0;
@@ -84,23 +87,20 @@ void loop() {
      
   }//if
 
-  //messaggio "controlla questo/i pin e dammi il valore "
-  if( (buff[0]=='@')&&(buff[1]=='d')&&(buff[22]=='#') ){
-    Serial.println("Arduino, controlla questi pin e inviami la misurazione corrispondente:");
-    
-    for(int i=2;i<22;i++){      
-      pin_array[(i-2)]=buff[i]-48;     
-      //Serial.print(pin_array[i-2]); 
-      sensor[i-2]=pin_array[i-2]; //questo pin è di sensore
-      Serial.print(sensor[i-2]);
+  //messaggio "dimmi i pin che stai controllando"  @pinreq#
+  else if( (buff[0]=='@')&&(buff[1]=='p')&&(buff[2]=='i')&&(buff[3]=='n')&&(buff[4]=='r')&&(buff[5]=='e')&&(buff[6]=='q')&&(buff[7]=='#') ) { 
+    Serial.println("Arduino, comunicami i pin che stai utilizzando:");    
+    for(int i=0;i<20;i++){
+      Serial.print(pinCom[i]);
     }
-
-    for(int i=0;i<64;i++){
+    //Serial.println(pinCom[buff[5]]);     
+     
+    for(int i=0;i<64;i++){//ripuliamo il buffer di lettura (23)
       buff[i]=0;
     }
         
-    cycle=0;
-        
+    cycle=0; //rimettiamo a zero le variabili di ciclo
+     
   }//if
 
   //acknowledge di port
@@ -114,22 +114,21 @@ void loop() {
     
   }//if
 
-  //messaggio "smetti di tenere d'occhio questo/i pin" (reset dell'applicazione)
-  else if( (buff[0]=='@')&&(buff[1]=='s')&&(buff[22]=='#') ){
-    Serial.println("Arduino, smetti di controllare i pin invitati");
+  //messaggio "smetti di tenere d'occhio questo pin"-->@stp:(pin i-esimo su 2 byte)#
+  else if( (buff[0]=='@')&&(buff[1]=='s')&&(buff[2]=='t')&&(buff[3]=='p')&&(buff[4]==':')&&(buff[7]=='#') ){
+    Serial.println("Arduino, smetti di controllare i pin inviati");
     Serial.println("Adesso stai controllando questi pin");
-
-    for(int i=2;i<22;i++){     
-      if( (buff[i]-48)==1){
-        pinCom[i-2]=0;
-        sensor[i-2]=0; //questo pin non appartiene più a un sensore
-        att[i-2]=0;
-        servoM[i-2]=0;    
-      }
-      Serial.print(pinCom[i-2]); 
-      //sensor[i-2]=0; //questo pin non appartiene più a un sensore
+    temperature=0; //non c'è più un sensore di temperatura sulla scheda
+    server_pin=((buff[5]-48)*10)+(buff[6]-48); //converte in decimale
+    pinCom[server_pin]=0; //pone a 1 la locazione corrispondente di pinCom 
+    sensor[server_pin]=0;
+    att[server_pin]=0;
+    servoM[server_pin]=0;
+    for(int i=0;i<20;i++){
+      Serial.print(pinCom[i]);
     }
-
+    server_pin=0;  
+                  
     for(int i=0;i<64;i++){ 
       buff[i]=0;
     }
@@ -138,41 +137,54 @@ void loop() {
     
   }//if
 
-  //set up degli attuatori (il server sa su quali pin di arduino sono presenti attuatori, e se sono più di uno per attuatore)
-  else if( (buff[0]=='@')&&(buff[1]=='t')&&(buff[22]=='#') ){
-    Serial.println("in arrivo setup degli attuatori su questi pin:");
-    
-     for(int i=2;i<22;i++){      
-      pin_array[(i-2)]=buff[i]-48;     
-      att[i-2]=pin_array[i-2]; //questo pin è di attuatore
-      Serial.print(att[i-2]);
-    }
-
+  //messaggio "questo pin è un sensore"-->@sen:(pin su 2 byte)#
+  else if( (buff[0]=='@')&&(buff[1]=='s')&&(buff[2]=='e')&&(buff[3]=='n')&&(buff[4]==':')&&(buff[7]=='#') ) { 
+    Serial.println("Arduino, questo pin appartiene ad un sensore:");                            
+    server_pin=((buff[5]-48)*10)+(buff[6]-48); //converte in decimale
+    Serial.println(server_pin);
+    sensor[server_pin]=1;
+    server_pin=0;
+   
     for(int i=0;i<64;i++){ 
       buff[i]=0;
-    }
+    } 
+        
+    cycle=0;
+     
+  }//if
+
+  //set up degli attuatori-può servire per avere un attuatore sempre in funzioni (es. motore "rotante")-->@att:(pin su 2 byte)#
+  else if( (buff[0]=='@')&&(buff[1]=='a')&&(buff[2]=='t')&&(buff[3]=='t')&&(buff[4]==':')&&(buff[7]=='#') ){
+    Serial.println("questo pin è di attuatore:");                           
+    server_pin=((buff[5]-48)*10)+(buff[6]-48); //converte in decimale
+    Serial.println(server_pin);
+    att[server_pin]=1;
+    server_pin=0;
+   
+    for(int i=0;i<64;i++){ 
+      buff[i]=0;
+    } 
         
     cycle=0; 
     
   }//if
 
-  else if( (buff[0]=='@')&&(buff[1]=='m')&&(buff[22]=='#') ){ //se si usa un servo ci vuole un mess in più per le specificità
-    Serial.println("questi pin appartengono a un servomotore:");
-    
-    for(int i=2;i<22;i++){      
-      pin_array[(i-2)]=buff[i]-48;      
-      servoM[i-2]=pin_array[i-2];
-      Serial.print(servoM[i-2]);
-    }
-
+  //può essere una specificazione di attuatore, come un servo-->@ser:(pin)#
+  else if( (buff[0]=='@')&&(buff[1]=='s')&&(buff[2]=='e')&&(buff[3]=='r')&&(buff[4]==':')&&(buff[7]=='#') ){ //se si usa un servo ci vuole un mess in più per le specificità
+    Serial.println("questo pin appartiene a un servomotore:");                         
+    server_pin=((buff[5]-48)*10)+(buff[6]-48); //converte in decimale
+    Serial.println(server_pin);
+    servoM[server_pin]=1;
+    server_pin=0;
+   
     for(int i=0;i<64;i++){ 
       buff[i]=0;
-    }
+    } 
         
-    cycle=0; 
+    cycle=0;
     
   }//if
-
+  
   //se server gli manda @m9:30# arduino deve mandare un impulso al pin 9 dove sta il servo di 30 gradi
   else if( (buff[0]=='@')&&(buff[1]=='m')&&(buff[3]==':')&&(buff[6]=='#') ){ 
     Serial.println("Arduino, muovi il servo");
@@ -184,6 +196,25 @@ void loop() {
       servo.write(grades); 
       delay(1000);
       grades=0;
+      server_pin=0;
+   
+    for(int i=0;i<64;i++){ 
+      buff[i]=0;
+    }
+    
+  //todo altri comandi singoli bit tipo led, ecc  
+        
+    cycle=0; 
+    
+  }//if
+
+  //se riceve @tmp:(pin i-esimo)# significa che quel pin è di un sensore di temperatura
+  else if( (buff[0]=='@')&&(buff[1]=='t')&&(buff[2]=='m')&&(buff[3]=='p')&&(buff[4]==':')&&(buff[6]=='#') ){ 
+    Serial.println("Arduino, il pin appartiene a un sensore di temperatura");
+              
+      server_pin=buff[5]-48; //legge il pin da comandare
+      Serial.println(server_pin);
+      temperature=1;
       server_pin=0;
    
     for(int i=0;i<64;i++){ 
@@ -215,15 +246,20 @@ void loop() {
       //bisogna fare due routine separate per sensori digitali e analogici, perché in quelli analogici sono necessari calcoli per rendere la misurazione dipendente dal'alimentazione a 5V
       if( (i>=0)&&(i<6) ){ //pin analogici A0____A5 (6 pin)
         sensor_voltage=analogRead(i);
-        a_mis[i]=sensor_voltage*voltage/1024; //gestione particolare della temperatura, caso specifico
-        Serial.println( (a_mis[i]*1000-500)/10 );
-        a_mis[i]=(a_mis[i]*1000-500)/10;
+        if(temperature==1){ //temperature vale 1 finché server non comunica altrimenti. ho supposto 1 solo sensore per ogni tipo su ogni scheda (per cui basta una variabile tipodelsensore invece che un array!)
+          a_mis[i]=sensor_voltage*voltage/1024; //gestione particolare, caso specifico
+          a_mis[i]=(a_mis[i]*1000-500)/10;
+        }
+        
+        //todo altri if oltre a temperatura (luminosità, distanza, ecc)
+        
+        Serial.println(a_mis[i]);      
         delay(1500);
       }//if
       //qui if digitale (todo)
     }//fine if sensori
 
-    for(int i=0;i<20;i++){  //converto a int per fare il confronto
+    for(int i=0;i<20;i++){  //converto a int per fare il confronto (a causa dell'imprecisione dei float)
       a_mis[i]=(int)(a_mis[i]);
       a_old_mis[i]=(int)(a_old_mis[i]);
     }
@@ -233,12 +269,6 @@ void loop() {
       Serial.println("attuatore in funzione sul pin numero:");
       Serial.println(i);
       delay(1000);
-      if(a_mis[0]>21){
-        servo.attach(i);
-        servo.write(25); //potrebbe indicarlo server questo valore
-        delay(1000);
-        servo.write(1);
-      }
     }//if attuatori
   }//for
   
