@@ -367,7 +367,7 @@ void loop() {
           Serial.println(a_misL[i]);
         }
 
-        delay(1500);
+        delay(500);  //500
       }//if
       //qui if digitale (todo)
     }//fine if sensori
@@ -384,7 +384,7 @@ void loop() {
     if( (att[i]==1)and(servoM[i]==1)and(pinCom[i]==1) ){ //se quel pin è di attuatore, in particolare un servo e server gli ha detto di controllarlo
       Serial.println("attuatore in funzione sul pin numero:");
       Serial.println(i);
-      delay(1000);
+      delay(500);
     }//if 
     //todo if altri attuatori (led ecc)
   }//for
