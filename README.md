@@ -1,25 +1,44 @@
 # Arduino_PPM
 
-Il codice non è ancora abbastanza generico da permettere il settaggio completo della scheda da parte di Port.
-Arduino al momento riconosce un set limitato di comandi.
-Per testarne il funzionamento si legga quanto segue.
-(nell'esempio si suppone il cavo di segnale del servo collegato al pin digitale 9, il sensore di temperatura sul pin A0 analogico)
-Esempio di dialogo e setup:
-server per prima cosa invia un comando @p-------------# per indicare i pin in uso nell'applicazione.
-in seguito specifica quali sono di sensore, quali di attuatore, e tra questi quali di servomotore e altre specificità.
-di conseguenza arduino ha l'array pinCom[] che contiene, per esempio, 6 pin a 1 e 14 a 0 (in caso usiamo 6 pin su 14). di questi 6, 4
-sono di sensori e due di attuatori, perciò sensor[] ha 4 bit a 1 e att[] ne ha 2. dei due attuatori, mettiamo che
-uno sia un servo, per cui servoM[] ha 1 bit a uno.
+Al momento una scheda equipaggiata con software arduino.ino è in grado di gestire:
 
-#Se voglio attivare un sensore sul pin 0 e un attuatore servomotore sul pin 9 devo:
+-sensore di temperatura
 
-inviare @p10000000010000000000#  --->pin di interesse (attuatori e sensori)
+-sensore di luminosità
 
-inviare @d10000000000000000000#  --->sensor[] ha1 pin a uno (lo zero)
+-attuatore LED
 
-inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
+-attuatore servomotore
 
-inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
+I componenti possono essere in funzione anche contemporaneamente. Ho supposto un solo sensore di ogni tipo per Com.
+I sensori, per il momento, sono stati supposti solo analogici (per un fatto di risparmio di memoria, ottimizzabile nelle fasi finali del progetto).
 
-volendo, si può muovere il servo a piacere inviando, ad esempio, il comando: @m9:30# (se si volesse muovere di 30 gradi il servo sul pin 9)
+Set di comandi:
+
+-@pin:00#   (l'applicazione userà il pin 00)
+
+-@sen:00#  (il pin 00 è un sensore)
+
+-@tmp:00#  (il pin 00 è un sensore di temperatura)
+
+-@lum:01# (il pin 01 è un sensore di luminosità)
+
+-@led:05# (il pin 05 è un LED)
+
+-@att:05# (il pin 05 è un attuatore)
+
+-@a#  (ack da Port)
+
+-@pinreq# (dimmi i pin che hai attivi al momento)
+
+-@stp:00#  (smetti di utilizzare il pin 00)
+
+-@lon:05# (accendi il LED sul pin 05)
+
+-@lof:05# (spengi il LED sul pin 05)
+
+-@m09:60#  (ruota di 60 gradi il servo sul pin 09)
+
+-
+
 
