@@ -14,7 +14,7 @@ and operate in an environment (following indications from the server) using:
 
 Components can work all together with no conflicts. Board can handle only one sensor per type, from all the sensor types specificated. Sensors, at the moment, are supposed to be only analog (in order not to use too much of the limited arduino memory with an expensive array implementation for digital measures), but it will be optimized in the final steps of the project in order to handle the PING sensor, which is digital.
 
-Instruction set (instructions starts with "@" and end with "#"):
+Instruction set (instructions start with "@" and end with "#"):
 
 -@pin:00#   (00 pin will be used in the current application)
 
