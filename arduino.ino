@@ -1,5 +1,3 @@
-//ho presupposto le misurazioni dei sensori solo analogiche per risparmiare memoria sugli array
-
 int pinCom[20]; //array che contiene i pin di interesse per l'applicazione particolare
 int cycle=0; //variabile di ciclo
 int buff[64]; //buffer di lettura. il buffer integrato che raccoglie i dati trasmessi della seriale contiene 64 bit, perciò anche lui ne ha al max 64
@@ -31,6 +29,7 @@ int lum[6];
 int led=0;
 int led_pin=-1;
 int pin_count=0; //conta il numero di pin attivi
+int stp=0;
 
 void setup() {
   Serial.begin(9600); 
@@ -144,6 +143,7 @@ void loop() {
     servoM[server_pin]=0;
     a_misT[server_pin]=0.0; 
     a_misL[server_pin]=0.0;
+    stp=1; //ogni volta che si riceve questo comando si setta stp a 1 (sarà poi resettato a zero)
     for(int i=0;i<20;i++){
       Serial.print(pinCom[i]);
     }
@@ -392,18 +392,27 @@ void loop() {
   //controllo array valori vecchi/nuovi
   for(int i=0;i<6;i++){ //attenzione, con questa tolleranza, se la temperatura sale di un grado per volta, anche se passasse da tipo 20 a 25 gradi arduino non notificherebbe volta volta!
     if( (a_old_misT[i]!=-1)and( (a_old_misT[i]<a_misT[i]-1)or(a_old_misT[i]>a_misT[i]+1)) ){ //problematico il confronto se sono due float
-      Serial.println("il sensore ha rilevato un cambiamento!");//da sostituire con l'invio di mis[i] a port 
-    }
+      
+      if(stp==0){  //se c'è un sensore attivo (altrimenti darebbe nuova misurazione una volta spento). anche se si è spento un sensore di luminosità lui non darà nuova misurazione,
+                   //perché stp è una sola. trascuriamo questa cosa, tanto per 1 turno non succede niente a perdere una misurazione. Ogni volta che si spenge un sensore salta una misura a tutti 
+        Serial.println("il sensore ha rilevato un cambiamento!");//da sostituire con l'invio di mis[i] a port    
+      }
+    }//if
 
-    if( (a_old_misL[i]!=-1)and( (a_old_misL[i]<a_misL[i]-1)or(a_old_misL[i]>a_misL[i]+1)) ){ //problematico il confronto se sono due float
-      Serial.println("il sensore ha rilevato un cambiamento!");//da sostituire con l'invio di mis[i] a port 
-    }
-  }
+    if( (a_old_misL[i]!=-1)and( (a_old_misL[i]<a_misL[i]-50)or(a_old_misL[i]>a_misL[i]+50)) ){ //tolleranza supposta di 50
+      
+      if(stp==0){  
+        Serial.println("il sensore ha rilevato un cambiamento!");//da sostituire con l'invio di mis[i] a port    
+      }
+    }//if
+  }//for
+  
+  stp=0; //dopo aver perso una misurazione in caso di comando @stp, si resetta a zero 
 
   for(int i=0;i<6;i++){
     a_old_misT[i]=a_misT[i]; //come detto sopra, se la temperatura sale o scende "dolcemente", anche se alla lunga varia di molto il server non viene notificato! occhio
     a_old_misL[i]=a_misL[i];
-  }
+  } //for
   
   array_start=0; //non re-inizializzare old_mis
 }//loop
