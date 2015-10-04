@@ -1,43 +1,44 @@
 # Arduino_PPM
 
-Al momento una scheda equipaggiata con software arduino.ino è in grado di gestire:
+An arduino board running arduino.ino code can dialogue with a server to obtain measures using (at the moment):
 
--sensore di temperatura
+-temperature sensor
 
--sensore di luminosità
+-luminosity sensor
 
--attuatore LED
+and operate with:
 
--attuatore servomotore
+-LED actuator
 
-I componenti possono essere in funzione anche contemporaneamente. Ho supposto un solo sensore di ogni tipo per Com.
-I sensori, per il momento, sono stati supposti solo analogici (per un fatto di risparmio di memoria, ottimizzabile nelle fasi finali del progetto).
+-Servomotor actuator
 
-Set di comandi (un comando inizia per "@" e termina per "#"):
+Components can work all together with no conflicts. Board can handle only one sensor per type, from all the sensor types specificated. Sensors, at the moment, are supposed to be only analog (in order not to use too much of the limited arduino memory), but it can be optimized in the final steps of the project.
 
--@pin:00#   (l'applicazione userà il pin 00)
+Instruction set (instructions starts with "@" and end with "#"):
 
--@sen:00#  (il pin 00 è un sensore)
+-@pin:00#   (00 pin will be used in the current application)
 
--@tmp:00#  (il pin 00 è un sensore di temperatura)
+-@sen:00#  (00 pin is a sensor pin)
 
--@lum:01# (il pin 01 è un sensore di luminosità)
+-@tmp:00#  (00 pin is a temperature sensor pin)
 
--@led:05# (il pin 05 è un LED)
+-@lum:01# (00 pin is a luminosity sensor pin)
 
--@att:05# (il pin 05 è un attuatore)
+-@led:05# (05 pin is a LED pin)
 
--@a#  (ack da Port)
+-@att:05# (05 pin is an actuator pin)
 
--@pinreq# (dimmi i pin che hai attivi al momento)
+-@a#  (Ack signal from Port)
 
--@stp:00#  (smetti di utilizzare il pin 00)
+-@pinreq# ("tell me the pin you are using")
 
--@lon:05# (accendi il LED sul pin 05)
+-@stp:00#  ("stop using 00 pin")
 
--@lof:05# (spengi il LED sul pin 05)
+-@lon:05# ("turn on the LED on 05 pin")
 
--@m09:60#  (ruota di 60 gradi il servo sul pin 09)
+-@lof:05# ("turn off the LED on 05 pin")
+
+-@m09:60#  ("rotate the servo on 09 pin of a 60 degrees angle")
 
 -
 
