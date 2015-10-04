@@ -6,7 +6,7 @@ An arduino board running arduino.ino code can dialogue with a server to obtain m
 
 -luminosity sensor
 
-and operate with:
+and operate in an environment (following indications from the server) using:
 
 -LED actuator
 
