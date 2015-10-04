@@ -13,7 +13,7 @@ Al momento una scheda equipaggiata con software arduino.ino è in grado di gesti
 I componenti possono essere in funzione anche contemporaneamente. Ho supposto un solo sensore di ogni tipo per Com.
 I sensori, per il momento, sono stati supposti solo analogici (per un fatto di risparmio di memoria, ottimizzabile nelle fasi finali del progetto).
 
-Set di comandi (un comando inizia per "@" e termina per "#")
+Set di comandi (un comando inizia per "@" e termina per "#"):
 
 -@pin:00#   (l'applicazione userà il pin 00)
 
