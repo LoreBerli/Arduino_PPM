@@ -2,9 +2,9 @@
 
 An arduino board running arduino.ino code can dialogue with a server to obtain measures using (at the moment):
 
--temperature sensor
+-Temperature sensor
 
--luminosity sensor
+-Luminosity sensor
 
 and operate in an environment (following indications from the server) using:
 
