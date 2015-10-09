@@ -1,25 +1,45 @@
 # Arduino_PPM
 
-Il codice non è ancora abbastanza generico da permettere il settaggio completo della scheda da parte di Port.
-Arduino al momento riconosce un set limitato di comandi.
-Per testarne il funzionamento si legga quanto segue.
-(nell'esempio si suppone il cavo di segnale del servo collegato al pin digitale 9, il sensore di temperatura sul pin A0 analogico)
-Esempio di dialogo e setup:
-server per prima cosa invia un comando @p-------------# per indicare i pin in uso nell'applicazione.
-in seguito specifica quali sono di sensore, quali di attuatore, e tra questi quali di servomotore e altre specificità.
-di conseguenza arduino ha l'array pinCom[] che contiene, per esempio, 6 pin a 1 e 14 a 0 (in caso usiamo 6 pin su 14). di questi 6, 4
-sono di sensori e due di attuatori, perciò sensor[] ha 4 bit a 1 e att[] ne ha 2. dei due attuatori, mettiamo che
-uno sia un servo, per cui servoM[] ha 1 bit a uno.
+An arduino board running arduino.ino code can dialogue with a server to obtain measures using (at the moment):
 
-#Se voglio attivare un sensore sul pin 0 e un attuatore servomotore sul pin 9 devo:
+-Temperature sensor
 
-inviare @p10000000010000000000#  --->pin di interesse (attuatori e sensori)
+-Luminosity sensor
 
-inviare @d10000000000000000000#  --->sensor[] ha1 pin a uno (lo zero)
+and operate in an environment (following indications from the server) using:
 
-inviare @t00000000010000000000#  --->att[] ha 1 pin a uno (il 9)
+-LED actuator
 
-inviare @m00000000010000000000#  --->servoM[] ha 1 pin a uno (il 9)
+-Servomotor actuator
 
-volendo, si può muovere il servo a piacere inviando, ad esempio, il comando: @m9:30# (se si volesse muovere di 30 gradi il servo sul pin 9)
+Components can work all together with no conflicts. Board can handle only one sensor per type, from all the sensor types specificated. Sensors, at the moment, are supposed to be only analog (in order not to use too much of the limited arduino memory with an expensive array implementation for digital measures), but it will be optimized in the final steps of the project in order to handle the PING sensor, which is digital.
+
+Instruction set (instructions start with "@" and end with "#"):
+
+-@pin:00#   (00 pin will be used in the current application)
+
+-@sen:00#  (00 pin is a sensor pin)
+
+-@tmp:00#  (00 pin is a temperature sensor pin)
+
+-@lum:01# (00 pin is a luminosity sensor pin)
+
+-@led:05# (05 pin is a LED pin)
+
+-@att:05# (05 pin is an actuator pin)
+
+-@a#  (Ack signal from Port)
+
+-@pinreq# ("tell me the pin you are using")
+
+-@stp:00#  ("stop using 00 pin")
+
+-@lon:05# ("turn on the LED on 05 pin")
+
+-@lof:05# ("turn off the LED on 05 pin")
+
+-@m09:60#  ("rotate the servo on 09 pin of a 60 degrees angle")
+
+-
+
 
